@@ -1,0 +1,22 @@
+[package]
+name = "notifications-service"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = { version = "=0.5.0-rc.3", features = ["tls", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+chrono = "0.4"
+maplit = "1.0"
+lettre = "0.10"
+
+[dependencies.auto_impl]
+version = "~1"
+
+[dependencies.once_cell]
+version = "~1"
+
+[dependencies.async-trait]
+version = "~0.1"

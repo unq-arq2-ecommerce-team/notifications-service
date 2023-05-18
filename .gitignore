@@ -1,0 +1,26 @@
+# Compiled files
+/target/
+
+# Generated documentation
+/doc/
+
+# IDE and editor files
+/.idea/
+/.vscode/
+/.ccls/
+/.rustfmt.toml
+/.cargo/
+
+# Build artifacts
+Cargo.lock
+Cargo.toml.orig
+Cargo.toml.bk
+
+# Generated files
+*.rs.bk
+
+# Logs
+*.log
+
+# Dependency directories
+/vendor/

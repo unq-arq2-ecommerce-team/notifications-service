@@ -2,17 +2,19 @@ use lettre::{Message, SmtpTransport, Transport};
 use lettre::message::header::ContentType;
 use lettre::transport::smtp::authentication::Credentials;
 use crate::api::notification_request::NotificationRequest;
+use crate::config::properties::Properties;
 use crate::model::email::smtp::{Email};
 use crate::SmtpClient;
 
 pub struct OutlookClient {
     pub(crate) smtp_server: SmtpTransport,
+    properties: Properties,
 }
 
 impl SmtpClient for OutlookClient {
 
     fn send(&self, email: Email) -> Result<String, String> {
-        let result = self.smtp_server.send(&Self::build_message(email));
+        let result = self.smtp_server.send(&self.build_message(email));
 
         match result {
             Ok(_) => Ok("Email sent successfully".to_string()),
@@ -23,13 +25,16 @@ impl SmtpClient for OutlookClient {
 
 impl OutlookClient {
     pub fn new() -> Self {
-        OutlookClient { smtp_server: smtp_server_impl() }
+        OutlookClient {
+            properties: Properties::new(),
+            smtp_server: smtp_server_impl(Properties::new()),
+        }
     }
 
-    fn build_message(email: Email) -> Message {
+    fn build_message(&self, email: Email) -> Message {
         Message::builder()
-            .from("ArqSoft2-TP <arq-soft2-unq@outlook.com>".parse().unwrap())
-            .reply_to("ArqSoft2-TP <arq-soft2-unq@outlook.com>".parse().unwrap())
+            .from(self.properties.get("SMTP_FROM").parse().unwrap())
+            .reply_to(self.properties.get("SMTP_FROM").parse().unwrap())
             .to(email.to.parse().unwrap())
             .subject(email.subject.to_string())
             .header(ContentType::TEXT_HTML)
@@ -45,13 +50,19 @@ impl Default for OutlookClient {
     }
 }
 
-fn smtp_server_impl() -> SmtpTransport {
-    let creds = Credentials::new("arq-soft2-unq@outlook.com".to_owned(), "PrimerCuatrimestre2023".to_owned());
+fn smtp_server_impl(properties :Properties) -> SmtpTransport {
 
-    SmtpTransport::starttls_relay("smtp.office365.com")
+    let username = properties.get("SMTP_USERNAME");
+    let password = properties.get("SMTP_PASSWORD");
+    let port = properties.get("SMTP_PORT").parse::<u16>().unwrap();
+    let host = &properties.get("SMTP_HOST");
+
+    let creds = Credentials::new(username, password);
+
+    SmtpTransport::starttls_relay(host)
         .unwrap()
         .credentials(creds)
-        .port(587)
+        .port(port)
         .build()
 }
 

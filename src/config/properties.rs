@@ -6,21 +6,32 @@ pub struct Properties {
     properties: HashMap<String, String>,
 }
 
+struct PropKeyValue {
+    key: String,
+    value: String,
+}
+
 impl Properties {
     pub fn new() -> Self {
-        let mut properties = HashMap::new();
+        let tuples =  [
+            get_env_or_default("SMTP_HOST", "smtp.office365.com"),
+            get_env_or_default("SMTP_PORT", "587"),
+            get_env_or_default("SMTP_USERNAME", "arq-soft2-unq@outlook.com"),
+            get_env_or_default("SMTP_PASSWORD", ""),
+            get_env_or_default("SMTP_FROM", "ArqSoft2-TP <arq-soft2-unq@outlook.com>"),
+            get_env_or_default("SMTP_TLS", "true"),
+        ];
 
-        properties.insert("SMTP_HOST".to_string(), env::var("SMTP_HOST").unwrap_or("smtp.office365.com".to_string()));
-        properties.insert("SMTP_PORT".to_string(), env::var("SMTP_PORT").unwrap_or("587".to_string()));
-        properties.insert("SMTP_USERNAME".to_string(), env::var("SMTP_USERNAME").unwrap_or("".to_string()));
-        properties.insert("SMTP_PASSWORD".to_string(), env::var("SMTP_PASSWORD").unwrap_or("".to_string()));
-        properties.insert("SMTP_FROM".to_string(), env::var("SMTP_FROM").unwrap_or("".to_string()));
-        properties.insert("SMTP_TLS".to_string(), env::var("SMTP_TLS").unwrap_or("true".to_string()));
-
-        Properties { properties }
+        let props = tuples.into_iter().collect();
+        Properties { properties: props }
     }
 
     pub fn get(&self, key: &str) -> String {
         self.properties.get(key).unwrap().to_string()
     }
+}
+
+fn get_env_or_default(key: &str, default: &str) -> (String, String) {
+    let value = env::var(key).unwrap_or(default.to_string());
+    (key.to_string(), value)
 }

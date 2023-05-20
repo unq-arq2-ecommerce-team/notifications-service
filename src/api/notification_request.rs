@@ -21,7 +21,7 @@ impl NotificationRequest {
 pub struct Recipient {
     #[serde(rename = "type")]
     pub recipient_type: RecipientType,
-    pub id: u32,
+    pub id: i32,
 }
 
 #[derive(serde::Deserialize)]

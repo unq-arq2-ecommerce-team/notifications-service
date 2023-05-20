@@ -1,7 +1,6 @@
 use lettre::{Message, SmtpTransport, Transport};
 use lettre::message::header::ContentType;
 use lettre::transport::smtp::authentication::Credentials;
-use crate::api::notification_request::NotificationRequest;
 use crate::config::properties::Properties;
 use crate::model::email::smtp::{Email};
 use crate::SmtpClient;

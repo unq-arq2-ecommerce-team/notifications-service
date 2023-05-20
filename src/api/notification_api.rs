@@ -1,6 +1,4 @@
 use rocket::serde::json::Json;
-use rocket::serde::{Deserialize, Serialize};
-use rocket::State;
 use crate::api::notification_request::NotificationRequest;
 use crate::NotificationService;
 

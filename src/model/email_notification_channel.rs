@@ -1,12 +1,7 @@
 use std::sync::Arc;
-use lettre::message::header::ContentType;
-use lettre::transport::smtp::authentication::Credentials;
-use lettre::{Message, SmtpTransport};
 
-use crate::api::notification_request::{Channel, Event, EventName, NotificationRequest, RecipientType};
+use crate::api::notification_request::{Channel, EventName, NotificationRequest, RecipientType};
 use crate::model::notification_service::NotificationChannel;
-use crate::model::email::body_templates::purchase_mail_template;
-use crate::model::email::body_templates::payment_rejected_template;
 use crate::model::email::email_templates::{EmailTemplate, PaymentRejectedTemplate, PurchaseSuccessfulTemplate};
 use crate::model::email::smtp::Email;
 use crate::model::user::customer::CustomerRepository;
@@ -27,12 +22,9 @@ impl NotificationChannel for EmailNotificationChannel {
     fn send(&self, notification: &NotificationRequest) {
         println!("Sending email notification: {:?}", notification.event.name.to_string());
 
-        let result = self.smtp_client.send(self.build_email(notification));
-
-        if result.is_ok() {
-            println!("Email sent successfully!");
-        } else {
-            println!("Failed to send email: {:?}", result.err().unwrap());
+        match self.smtp_client.send(self.build_email(notification)) {
+            Ok(_) => println!("Email sent successfully!"),
+            Err(err) => println!("Failed to send email: {:?}", err.to_string())
         }
     }
 }
@@ -41,7 +33,7 @@ impl EmailNotificationChannel {
     fn build_email(&self, notification: &NotificationRequest) -> Email {
         let email_template = self.get_email_template(notification);
 
-        let to_email = self.get_to_email(notification);
+        let to_email = self.get_recipient_email(notification);
 
         Email {
             to: to_email.to_string(),
@@ -50,20 +42,20 @@ impl EmailNotificationChannel {
         }
     }
 
-    fn get_to_email(&self, notification: &NotificationRequest) -> String {
+    fn get_recipient_email(&self, notification: &NotificationRequest) -> String {
         match notification.recipient.recipient_type {
             RecipientType::Seller => {
                 let result = self.seller_repository.find_by_id(notification.recipient.id);
                 match result {
                     Ok(seller) => seller.email,
-                    Err(_) => panic!("Seller not found")
+                    Err(err) => panic!("{} - {}", "Seller not found", err.to_string())
                 }
             }
             RecipientType::Customer => {
                 let result = self.customer_repository.find_by_id(notification.recipient.id);
                 match result {
                     Ok(customer) => customer.email,
-                    Err(_) => panic!("Customer not found")
+                    Err(err) => panic!("{} - {}", "Customer not found", err.to_string())
                 }
             }
         }

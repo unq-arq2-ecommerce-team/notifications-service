@@ -6,14 +6,14 @@ pub struct RestClient {
 }
 
 impl RestClient {
-    pub fn new(base_url: &str) -> Self {
+    pub fn new(base_url: String) -> Self {
         RestClient {
-            base_url: base_url.to_string(),
+            base_url,
         }
     }
 
     pub fn build_url(&self, endpoint: &str) -> String {
-        format!("{}/{}", self.base_url, endpoint)
+        format!("{}/{}", self.base_url.to_string(), endpoint)
     }
 
     pub fn get<T>(&self, endpoint: &str) -> Result<T, String>
@@ -21,6 +21,7 @@ impl RestClient {
             T: DeserializeOwned,
     {
         let url = self.build_url(endpoint);
+        println!("getting from url: {}", url);
 
         tokio::task::block_in_place(|| {
             let result = match reqwest::blocking::get(url) {

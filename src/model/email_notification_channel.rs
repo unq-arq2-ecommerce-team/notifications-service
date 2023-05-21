@@ -44,7 +44,7 @@ impl EmailNotificationChannel {
                 Ok(Email {
                     to: to_email.to_string(),
                     subject: email_template.subject().to_string(),
-                    body: email_template.body().to_string(),
+                    body: email_template.body(notification).to_string(),
                 })
             }
             Err(err) => Err(err)
@@ -75,11 +75,11 @@ impl EmailNotificationChannel {
 
         match event_name {
             EventName::PurchaseSuccessful => match notification_request.recipient.recipient_type {
-                RecipientType::Seller => Box::new(SaleSuccessfulTemplate { notification: notification_request }),
-                RecipientType::Customer => Box::new(PurchaseSuccessfulTemplate { notification: notification_request }),
+                RecipientType::Seller => Box::new(SaleSuccessfulTemplate::new()),
+                RecipientType::Customer => Box::new(PurchaseSuccessfulTemplate::new()),
             },
 
-            EventName::PaymentRejected => Box::new(PaymentRejectedTemplate { notification: notification_request }),
+            EventName::PaymentRejected => Box::new(PaymentRejectedTemplate::new()),
         }
     }
 }

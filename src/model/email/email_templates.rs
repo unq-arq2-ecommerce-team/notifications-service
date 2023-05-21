@@ -1,5 +1,5 @@
 use crate::api::notification_request::NotificationRequest;
-use crate::model::email::body_templates::{payment_rejected_template, purchase_mail_template};
+use crate::model::email::body_templates::{payment_rejected_template, purchase_mail_template, sale_successful_template};
 
 pub trait EmailTemplate {
     fn body(&self) -> String;
@@ -32,6 +32,20 @@ impl EmailTemplate for PaymentRejectedTemplate<'_> {
 
     fn subject(&self) -> String {
         "Pago rechazado".to_string()
+    }
+}
+
+pub struct SaleSuccessfulTemplate<'a> {
+    pub notification : &'a NotificationRequest,
+}
+
+impl EmailTemplate for SaleSuccessfulTemplate<'_> {
+    fn body(&self) -> String {
+        replace_detail(sale_successful_template(), self.notification.get_event_detail())
+    }
+
+    fn subject(&self) -> String {
+        "Venta exitosa".to_string()
     }
 }
 

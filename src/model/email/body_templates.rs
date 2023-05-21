@@ -66,3 +66,63 @@ pub fn payment_rejected_template() -> &'static str {
         </body>
     </html>"
 }
+
+pub fn sale_successful_template() -> &'static str {
+    "<html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Successful Sale</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f5f5f5;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #ffffff;
+                    padding: 30px;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .content {
+                    margin-bottom: 30px;
+                    color: #333333;
+                }
+                .footer {
+                    text-align: center;
+                    color: #999999;
+                }
+                .sale {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #00aaff;
+                    margin-bottom: 10px;
+                }
+                .event-detail {
+                    font-size: 16px;
+                    color: #777777;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Successful Sale</h2>
+                </div>
+                <div class='content'>
+                    <p class='sale'>Congratulations! You have sold an item.</p>
+                    <p class='event-detail'>Item Details: {{event_detail}}</p>
+                </div>
+                <div class='footer'>
+                    <p>Thank you for using our platform!</p>
+                </div>
+            </div>
+        </body>
+        </html>"
+}

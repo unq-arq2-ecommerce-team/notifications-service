@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::api::notification_request::{Channel, EventName, NotificationRequest, RecipientType};
 use crate::model::notification_service::NotificationChannel;
-use crate::model::email::email_templates::{EmailTemplate, PaymentRejectedTemplate, PurchaseSuccessfulTemplate};
+use crate::model::email::email_templates::{EmailTemplate, PaymentRejectedTemplate, PurchaseSuccessfulTemplate, SaleSuccessfulTemplate};
 use crate::model::email::smtp::Email;
 use crate::model::error::{Error, msg};
 use crate::model::{notification_sent, NotificationStatus};
@@ -74,7 +74,11 @@ impl EmailNotificationChannel {
         let event_name = notification_request.get_event_name();
 
         match event_name {
-            EventName::PurchaseSuccessful => Box::new(PurchaseSuccessfulTemplate { notification: notification_request }),
+            EventName::PurchaseSuccessful => match notification_request.recipient.recipient_type {
+                RecipientType::Seller => Box::new(SaleSuccessfulTemplate { notification: notification_request }),
+                RecipientType::Customer => Box::new(PurchaseSuccessfulTemplate { notification: notification_request }),
+            },
+
             EventName::PaymentRejected => Box::new(PaymentRejectedTemplate { notification: notification_request }),
         }
     }

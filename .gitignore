@@ -25,4 +25,8 @@ Cargo.toml.bk
 # Dependency directories
 /vendor/
 
+# Private environment variables
+resources/local.env
+```
+
 

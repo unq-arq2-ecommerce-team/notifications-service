@@ -1,4 +1,4 @@
-# nofication-service
+# notifications-service
 
 ## Tecnologías:
 
@@ -62,41 +62,23 @@ Levanta el servicio en el puerto 8000
 2) Construir el Dockerfile (imagen) del servicio
 
 ```
-docker build . -t notification-service
+docker build . -t notifications-service
 ```
 
 3) Ejecutar la imagen construida
 
+Se necesita configurar users-service en la red.
 
-
-Nota: Pedir credenciales por privado.
+Nota: Pedir contraseña cuenta SMTP por privado.
 
 
 ```
-docker run -p <port>:8081 --env-file ./resources/local.env --name users-service users-service
+docker run -p 8000:8000 --env-file ./resources/local.env --name notifications-service notifications-service
 ```
-
-Nota: agregar "-d" si se quiere ejecutar como deamon
-
-```
-docker run -d -p <port>:8081 --env-file ./resources/local.env --name users-service users-service
-```
-
-Ejemplo:
-
-```
-docker run -d -p 8081:8081 --env-file ./resources/local.env --name users-service users-service
-```
-
-4) En un browser, abrir swagger del servicio en el siguiente url:
-
-`http://localhost:<port>/docs/index.html`
-
-Segun el ejemplo:
-
-`http://localhost:8081/docs/index.html`
 
 5) Probar el endpoint health check y debe retornar ok
 
-6) La API esta disponible para ser utilizada
+```
+curl "http://localhost:8000/ping" 
+```
 

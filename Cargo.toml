@@ -21,3 +21,6 @@ version = "~1"
 
 [dependencies.async-trait]
 version = "~0.1"
+
+[dependencies.thiserror]
+version = "~1"

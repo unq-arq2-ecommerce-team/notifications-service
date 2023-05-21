@@ -1,4 +1,5 @@
 #[macro_use] extern crate rocket;
+#[macro_use] extern crate thiserror;
 
 use crate::model::email::smtp::SmtpClient;
 use crate::model::notification_service::{NotificationService};

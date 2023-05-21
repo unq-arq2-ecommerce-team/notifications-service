@@ -1,4 +1,5 @@
 use rocket::serde::{Deserialize, Serialize};
+use crate::model::error::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Customer {
@@ -9,5 +10,5 @@ pub struct Customer {
 }
 
 pub trait CustomerRepository {
-    fn find_by_id(&self, id: i32) -> Result<Customer, String>;
+    fn find_by_id(&self, id: i32) -> Result<Customer, Error>;
 }

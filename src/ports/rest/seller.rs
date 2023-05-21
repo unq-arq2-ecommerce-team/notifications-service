@@ -1,3 +1,4 @@
+use crate::model::error::Error;
 use crate::model::user::seller::{Seller, SellerRepository};
 use crate::ports::rest::rest_client::RestClient;
 
@@ -6,7 +7,7 @@ pub struct SellerRestClient {
 }
 
 impl SellerRepository for SellerRestClient {
-    fn find_by_id(&self, id: i32) -> Result<Seller, String> {
+    fn find_by_id(&self, id: i32) -> Result<Seller, Error> {
         let endpoint = format!("seller/{}", id);
         self.rest_client.get(&endpoint)
     }

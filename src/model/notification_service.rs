@@ -7,6 +7,8 @@ use crate::ports::rest::customer::CustomerRestClient;
 use crate::ports::rest::seller::SellerRestClient;
 use super::email_notification_channel::EmailNotificationChannel;
 use crate::config::properties::Properties;
+use crate::model::error::Error;
+use crate::model::NotificationStatus;
 
 
 pub struct NotificationService {
@@ -17,13 +19,11 @@ impl NotificationService {
     pub fn new() -> Self {
         NotificationService { notification_channels: build_channel_configs() }
     }
-    pub(crate) fn send_notification(&self, notification: NotificationRequest) {
+    pub(crate) fn send_notification(&self, notification: NotificationRequest) -> Result<NotificationStatus, Error>{
         self.notification_channels
             .get(&notification.channel)
             .unwrap()
-            .send(&notification);
-
-        println!("Notification sent");
+            .send(&notification)
     }
 }
 
@@ -35,7 +35,7 @@ impl Default for NotificationService {
 
 pub trait NotificationChannel {
     fn get_channel(&self) -> Channel;
-    fn send(&self, notification: &NotificationRequest);
+    fn send(&self, notification: &NotificationRequest) -> Result<NotificationStatus, Error>;
 }
 
 

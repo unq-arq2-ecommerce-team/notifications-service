@@ -37,10 +37,11 @@ pub enum RecipientType {
     Customer,
 }
 
-#[derive(serde::Deserialize, Eq, Hash, PartialEq)]
+#[derive(serde::Deserialize, Eq, Hash, PartialEq, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Channel {
     Email,
+    Whatsapp,
 }
 
 #[derive(serde::Deserialize)]

@@ -16,5 +16,5 @@ fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![routes::ping])
         .mount("/", routes![api::notification_api::notification])
+        .register("/", catchers![api::error::not_found, api::error::internal_error, api::error::unprocessable_entity])
 }
-

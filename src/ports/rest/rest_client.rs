@@ -1,6 +1,4 @@
-use std::borrow::Borrow;
 use reqwest::StatusCode;
-use rocket::response::status;
 use rocket::tokio;
 use serde::de::DeserializeOwned;
 use crate::model::error::{bad_input, Error, msg};

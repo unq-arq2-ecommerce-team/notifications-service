@@ -1,4 +1,3 @@
-use rocket::form::FromForm;
 use rocket::serde::json::Json;
 use crate::api::error::ApiError;
 use crate::api::notification_request::NotificationRequest;

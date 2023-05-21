@@ -7,7 +7,7 @@ use crate::ports::rest::customer::CustomerRestClient;
 use crate::ports::rest::seller::SellerRestClient;
 use super::email_notification_channel::EmailNotificationChannel;
 use crate::config::properties::Properties;
-use crate::model::error::Error;
+use crate::model::error::{bad_input, Error};
 use crate::model::NotificationStatus;
 
 
@@ -20,10 +20,9 @@ impl NotificationService {
         NotificationService { notification_channels: build_channel_configs() }
     }
     pub(crate) fn send_notification(&self, notification: NotificationRequest) -> Result<NotificationStatus, Error>{
-        self.notification_channels
-            .get(&notification.channel)
-            .unwrap()
-            .send(&notification)
+        self.notification_channels.get(&notification.channel)
+            .ok_or(bad_input(format!("Channel not found: {:?}", notification.channel))) // Result<&Box<dyn NotificationChannel>, Error>
+            .and_then(|channel| channel.send(&notification)) // Result<NotificationStatus, Error>
     }
 }
 

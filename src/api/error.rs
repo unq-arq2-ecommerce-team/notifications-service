@@ -42,17 +42,14 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApiError {
         let (status, err) = match self {
             ApiError::NotFound(err) => {
                 debug!("request failed with {:?}", err);
-
                 (http::Status::NotFound, err)
             }
             ApiError::BadRequest(err) => {
                 debug!("request failed with {:?}", err);
-
                 (http::Status::BadRequest, err)
             }
             ApiError::Other(err) => {
                 error!("request failed with {:?}", err);
-
                 (http::Status::InternalServerError, err)
             }
         };
@@ -70,8 +67,6 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApiError {
 impl From<model::error::Error> for ApiError {
     fn from(err: model::error::Error) -> Self {
         use crate::model::error::ErrorKind::*;
-
-        println!("errrrrrrrrrrrr: {:?}", err);
 
         match err.split() {
             (BadInput, err) => ApiError::BadRequest(Box::try_from(err).unwrap()),
@@ -100,7 +95,7 @@ fn serialize_msg<S>(msg: &&dyn fmt::Display, s: S) -> Result<S::Ok, S::Error>
 }
 
 #[catch(500)]
-pub(super) fn internal_error(_: &Request) -> content::RawJson<Vec<u8>> {
+pub fn internal_error(_: &Request) -> content::RawJson<Vec<u8>> {
     let err = serde_json::to_vec(&SerializeError {
         msg: &"an internal error occurred",
     })
@@ -110,9 +105,17 @@ pub(super) fn internal_error(_: &Request) -> content::RawJson<Vec<u8>> {
 }
 
 #[catch(404)]
-pub(super) fn not_found(_: &Request) -> content::RawJson<Vec<u8>> {
+pub fn not_found(_: &Request) -> content::RawJson<Vec<u8>> {
     let err =
         serde_json::to_vec(&SerializeError { msg: &"not found" }).unwrap_or_else(|_| Vec::new());
+
+    content::RawJson(err)
+}
+
+#[catch(422)]
+pub fn unprocessable_entity(_: &Request) -> content::RawJson<Vec<u8>> {
+    let err =
+        serde_json::to_vec(&SerializeError { msg: &"422 Unprocessable Entity" }).unwrap_or_else(|_| Vec::new());
 
     content::RawJson(err)
 }

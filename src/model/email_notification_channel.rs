@@ -85,6 +85,64 @@ impl EmailNotificationChannel {
 }
 
 
+#[cfg(test)]
+mod tests {
+    use crate::api::notification_request::{Event, Recipient};
+    use crate::model::test_data::{create_test_customer, MockCustomerRepository, MockSellerRepository, MockSmtpClient};
+    use super::*;
+
+    #[test]
+    fn build_email_should_return_error_when_get_recipient_email_fails() {
+        let notification = NotificationRequest {
+            recipient: Recipient {
+                id: 2, // id 2 will cause find_by_id to fail
+                recipient_type: RecipientType::Customer,
+            },
+            event: Event {
+                name: EventName::PurchaseSuccessful,
+                detail: "detail".to_string(),
+            },
+            channel: Channel::Email,
+        };
+
+        let email_notification_channel = EmailNotificationChannel {
+            smtp_client: Box::new(MockSmtpClient {}),
+            customer_repository: Arc::new(MockCustomerRepository {}),
+            seller_repository: Arc::new(MockSellerRepository {}),
+        };
+
+        let result = email_notification_channel.build_email(&notification);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn build_email_ok() {
+        let notification = NotificationRequest {
+            recipient: Recipient {
+                id: 1, // id 1 will cause find_by_id to succeed
+                recipient_type: RecipientType::Customer,
+            },
+            event: Event {
+                name: EventName::PurchaseSuccessful,
+                detail: "detail".to_string(),
+            },
+            channel: Channel::Email,
+        };
+
+        let email_notification_channel = EmailNotificationChannel {
+            smtp_client: Box::new(MockSmtpClient {}),
+            customer_repository: Arc::new(MockCustomerRepository {}),
+            seller_repository: Arc::new(MockSellerRepository {}),
+        };
+
+        let result = email_notification_channel.build_email(&notification);
+
+        assert!(result.is_ok());
+    }
+}
+
+
 
 
 

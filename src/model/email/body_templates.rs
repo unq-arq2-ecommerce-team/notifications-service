@@ -30,7 +30,7 @@ pub fn purchase_mail_template() -> &'static str {
         <div class='container'>
             <h1>Thank you for your purchase!</h1>
             <p>Your purchase details:</p>
-            <p><strong>Purchase Detail:</strong> <span class='highlight'>{{purchase_detail}}</span></p>
+            <p><strong>Purchase Detail:</strong> <span class='highlight'>{{event_detail}}</span></p>
             <p>If you have any questions or need further assistance, please don't hesitate to contact our support team.</p>
             <p>Best regards,</p>
             <p>Your Company Name</p>

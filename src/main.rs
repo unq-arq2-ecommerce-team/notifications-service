@@ -29,15 +29,13 @@ mod tests {
     use wiremock::matchers::{method, path};
     use crate::api::notification_request::{EventName, RecipientType};
     use crate::config::properties::{CUSTOMERS_SERVICE_URL, IS_INTEGRATION_TEST_ENV};
-    use crate::model::notification::test_data::{create_succeed_request, create_test_customer};
+    use crate::model::notification::test_data::{create_failing_request, create_succeed_request, create_test_customer};
 
     #[test]
     fn send_notification_ok() {
 
-
-
         let rt = Runtime::new().unwrap();
-        rt.block_on(mock_customer_response());
+        rt.block_on(mock_server());
 
         let client = Client::new(rocket()).expect("valid rocket instance");
         let notification_request = &create_succeed_request(RecipientType::Customer, EventName::PurchaseSuccessful, "item detail".to_string());
@@ -49,8 +47,30 @@ mod tests {
         assert_eq!(response.status(), Status::Ok);
     }
 
-    async fn mock_customer_response() {
+    #[test]
+    fn send_notification_fail_user_not_found() {
+
+        let rt = Runtime::new().unwrap();
+        rt.block_on(mock_server());
+
+        let client = Client::new(rocket()).expect("valid rocket instance");
+        let notification_request = &create_failing_request();
+
+        let response = client.post("/notification")
+            .json(notification_request)
+            .dispatch();
+
+        assert_eq!(response.status(), Status::BadRequest);
+    }
+
+    async fn mock_server() {
         let mock_server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/customer/2"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&mock_server)
+            .await;
 
         Mock::given(method("GET"))
             .and(path("/customer/1"))

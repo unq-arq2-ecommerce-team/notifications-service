@@ -12,7 +12,7 @@ impl fmt::Display for Error {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ErrorKind {
     BadInput,
     Other,

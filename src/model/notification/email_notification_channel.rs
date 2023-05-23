@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use crate::api::notification_request::{Channel, EventName, NotificationRequest, RecipientType};
-use crate::model::notification_service::NotificationChannel;
 use crate::model::email::email_templates::{EmailTemplate, PaymentRejectedTemplate, PurchaseSuccessfulTemplate, SaleSuccessfulTemplate};
 use crate::model::email::smtp::Email;
 use crate::model::error::{Error, msg};
-use crate::model::{notification_sent, NotificationStatus};
+use crate::model::notification::notification_service::NotificationChannel;
+use crate::model::notification::{notification_sent, NotificationStatus};
 use crate::model::user::customer::CustomerRepository;
 use crate::model::user::seller::SellerRepository;
 use crate::SmtpClient;
@@ -64,7 +64,9 @@ impl EmailNotificationChannel {
                 let result = self.customer_repository.find_by_id(notification.recipient.id);
                 match result {
                     Ok(customer) => Ok(customer.email),
-                    Err(err) => Err(err)
+                    Err(err) => {
+                        Err(err)
+                    }
                 }
             }
         }
@@ -87,29 +89,15 @@ impl EmailNotificationChannel {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::notification_request::{Event, Recipient};
-    use crate::model::test_data::{create_test_customer, MockCustomerRepository, MockSellerRepository, MockSmtpClient};
+    use crate::model::email::body_templates::{payment_rejected_template, purchase_mail_template, sale_successful_template};
+    use crate::model::notification::test_data::{create_failing_request, create_succeed_request, Mocked};
     use super::*;
 
     #[test]
     fn build_email_should_return_error_when_get_recipient_email_fails() {
-        let notification = NotificationRequest {
-            recipient: Recipient {
-                id: 2, // id 2 will cause find_by_id to fail
-                recipient_type: RecipientType::Customer,
-            },
-            event: Event {
-                name: EventName::PurchaseSuccessful,
-                detail: "detail".to_string(),
-            },
-            channel: Channel::Email,
-        };
+        let notification = create_failing_request();
 
-        let email_notification_channel = EmailNotificationChannel {
-            smtp_client: Box::new(MockSmtpClient {}),
-            customer_repository: Arc::new(MockCustomerRepository {}),
-            seller_repository: Arc::new(MockSellerRepository {}),
-        };
+        let email_notification_channel = EmailNotificationChannel::mocked();
 
         let result = email_notification_channel.build_email(&notification);
 
@@ -117,28 +105,48 @@ mod tests {
     }
 
     #[test]
-    fn build_email_ok() {
-        let notification = NotificationRequest {
-            recipient: Recipient {
-                id: 1, // id 1 will cause find_by_id to succeed
-                recipient_type: RecipientType::Customer,
-            },
-            event: Event {
-                name: EventName::PurchaseSuccessful,
-                detail: "detail".to_string(),
-            },
-            channel: Channel::Email,
-        };
+    fn build_purchase_customer_email_ok() {
+        let event_detail = "Nike Air Max 90".to_string();
+        let notification = create_succeed_request(RecipientType::Customer, EventName::PurchaseSuccessful, event_detail.clone());
 
-        let email_notification_channel = EmailNotificationChannel {
-            smtp_client: Box::new(MockSmtpClient {}),
-            customer_repository: Arc::new(MockCustomerRepository {}),
-            seller_repository: Arc::new(MockSellerRepository {}),
-        };
+        let email_notification_channel = EmailNotificationChannel::mocked();
 
         let result = email_notification_channel.build_email(&notification);
 
         assert!(result.is_ok());
+
+        let expected_body_email = purchase_mail_template().replace("{{event_detail}}", event_detail.as_str());
+        assert!(result.unwrap().body.contains(expected_body_email.as_str()));
+    }
+
+    #[test]
+    fn build_purchase_seller_email_ok() {
+        let event_detail = "Nike Air Max 90".to_string();
+        let notification = create_succeed_request(RecipientType::Seller, EventName::PurchaseSuccessful, event_detail.clone());
+
+        let email_notification_channel = EmailNotificationChannel::mocked();
+
+        let result = email_notification_channel.build_email(&notification);
+
+        assert!(result.is_ok());
+
+        let expected_body_email = sale_successful_template().replace("{{event_detail}}", event_detail.as_str());
+        assert!(result.unwrap().body.contains(expected_body_email.as_str()));
+    }
+
+    #[test]
+    fn build_rejected_payment_email_ok() {
+        let event_detail = "id: 1234 - ARS 15000".to_string();
+        let notification = create_succeed_request(RecipientType::Customer, EventName::PaymentRejected, event_detail.clone());
+
+        let email_notification_channel = EmailNotificationChannel::mocked();
+
+        let result = email_notification_channel.build_email(&notification);
+
+        assert!(result.is_ok());
+
+        let expected_body_email = payment_rejected_template().replace("{{event_detail}}", event_detail.as_str());
+        assert!(result.unwrap().body.contains(expected_body_email.as_str()));
     }
 }
 

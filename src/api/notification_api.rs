@@ -1,21 +1,22 @@
 use rocket::serde::json::Json;
 use crate::api::error::ApiError;
 use crate::api::notification_request::NotificationRequest;
-use crate::model::error::Error;
-use crate::model::NotificationStatus;
-use crate::NotificationService;
+use crate::model::notification::notification_service::NotificationService;
+use crate::model::notification::NotificationStatus;
+use crate::model::use_cases::SendNotification;
 
 
 #[post("/notification", data = "<notification>")]
 pub fn notification(notification: Json<NotificationRequest>) -> Result<Json<NotificationStatus>, ApiError> {
     let notification_req= notification.into_inner();
 
-    match get_notification_service().send_notification(notification_req) {
+    match notify_use_case().send_notification(notification_req) {
         Ok(notification_status) => Ok(Json(notification_status)),
         Err(err) => Err(ApiError::from(err)),
     }
 }
 
-fn get_notification_service() -> NotificationService {
-    NotificationService::default()
+fn notify_use_case() -> Box<dyn SendNotification> {
+    Box::new(NotificationService::default())
 }
+

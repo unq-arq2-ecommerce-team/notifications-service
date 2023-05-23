@@ -25,25 +25,15 @@ use crate::model;
 /** The main application error. */
 #[derive(Error, Debug)]
 pub enum ApiError {
-    #[error("an entity wasn't found")]
-    NotFound(#[source] Box<dyn error::Error + Send + Sync>),
     #[error("the user input was invalid")]
     BadRequest(#[source] Box<dyn error::Error + Send + Sync>),
     #[error("an unexpected error occurred")]
     Other(#[source] Box<dyn error::Error + Send + Sync>),
 }
 
-pub fn msg(err: impl fmt::Display) -> Box<dyn error::Error + Send + Sync> {
-    err.to_string().into()
-}
-
 impl<'r, 'o: 'r> Responder<'r, 'o> for ApiError {
     fn respond_to(self, _: &Request) -> response::Result<'o> {
         let (status, err) = match self {
-            ApiError::NotFound(err) => {
-                debug!("request failed with {:?}", err);
-                (http::Status::NotFound, err)
-            }
             ApiError::BadRequest(err) => {
                 debug!("request failed with {:?}", err);
                 (http::Status::BadRequest, err)

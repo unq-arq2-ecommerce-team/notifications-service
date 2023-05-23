@@ -1,6 +1,12 @@
 use crate::api::notification_request::NotificationRequest;
 use crate::model::email::body_templates::{payment_rejected_template, purchase_mail_template, sale_successful_template};
 
+const DETAIL_PLACEHOLDER: &str = "{{event_detail}}";
+
+const PURCHASE_SUCCESSFUL_SUBJECT: &str = "Compra exitosa";
+const PAYMENT_REJECTED_SUBJECT: &str = "Pago rechazado";
+const SALE_SUCCESSFUL_SUBJECT: &str = "Venta exitosa";
+
 pub trait EmailTemplate {
     fn body(&self, notification: &NotificationRequest) -> String {
         self.replace_detail(self.template(), notification.get_event_detail())
@@ -9,7 +15,7 @@ pub trait EmailTemplate {
     fn template(&self) -> &str;
 
     fn replace_detail(&self, template: &str, detail: &str) -> String {
-        template.replace("{{event_detail}}", detail)
+        template.replace(DETAIL_PLACEHOLDER, detail)
     }
 }
 
@@ -24,7 +30,7 @@ impl PurchaseSuccessfulTemplate {
 
 impl EmailTemplate for PurchaseSuccessfulTemplate {
     fn subject(&self) -> String {
-        "Compra exitosa".to_string()
+        PURCHASE_SUCCESSFUL_SUBJECT.to_string()
     }
 
     fn template(&self) -> &str {
@@ -42,7 +48,7 @@ impl PaymentRejectedTemplate {
 
 impl EmailTemplate for PaymentRejectedTemplate {
     fn subject(&self) -> String {
-        "Pago rechazado".to_string()
+        PAYMENT_REJECTED_SUBJECT.to_string()
     }
 
     fn template(&self) -> &str {
@@ -60,7 +66,7 @@ impl SaleSuccessfulTemplate {
 
 impl EmailTemplate for SaleSuccessfulTemplate {
     fn subject(&self) -> String {
-        "Venta exitosa".to_string()
+        SALE_SUCCESSFUL_SUBJECT.to_string()
     }
 
     fn template(&self) -> &str {

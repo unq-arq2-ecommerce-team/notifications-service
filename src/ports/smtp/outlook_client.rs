@@ -6,19 +6,13 @@ use crate::model::email::smtp::{Email};
 use crate::SmtpClient;
 
 pub struct OutlookClient {
-    pub(crate) smtp_server: SmtpTransport,
+    pub(crate) smtp_server: Box<dyn SmtpSender>,
     properties: Properties,
 }
 
 impl SmtpClient for OutlookClient {
-
     fn send(&self, email: Email) -> Result<String, String> {
-        let result = self.smtp_server.send(&self.build_message(email));
-
-        match result {
-            Ok(_) => Ok("Email sent successfully".to_string()),
-            Err(err) => Err(format!("Failed to send email: {:?}", err))
-        }
+        self.smtp_server.send(&self.build_message(email))
     }
 }
 
@@ -26,7 +20,7 @@ impl OutlookClient {
     pub fn new() -> Self {
         OutlookClient {
             properties: Properties::new(),
-            smtp_server: smtp_server_impl(Properties::new()),
+            smtp_server: Box::new(SmtpSenderLettre::default()),
         }
     }
 
@@ -49,8 +43,55 @@ impl Default for OutlookClient {
     }
 }
 
-fn smtp_server_impl(properties :Properties) -> SmtpTransport {
+pub trait TestEnvironment {
+    fn test_env() -> Self;
+}
 
+impl TestEnvironment for OutlookClient {
+    fn test_env() -> Self {
+        OutlookClient {
+            properties: Properties::new(),
+            smtp_server: Box::new(DummySmtpSender {}),
+        }
+    }
+}
+
+pub trait SmtpSender {
+    fn send(&self, message: &Message) -> Result<String, String>;
+}
+
+struct SmtpSenderLettre {
+    smtp_server: SmtpTransport,
+}
+
+impl Default for SmtpSenderLettre {
+    fn default() -> Self {
+        SmtpSenderLettre {
+            smtp_server: smtp_server_impl(Properties::new()),
+        }
+    }
+}
+
+impl SmtpSender for SmtpSenderLettre {
+    fn send(&self, message: &Message) -> Result<String, String> {
+        let result = self.smtp_server.send(message);
+
+        match result {
+            Ok(_) => Ok("Email sent successfully".to_string()),
+            Err(err) => Err(format!("Failed to send email: {:?}", err))
+        }
+    }
+}
+
+struct DummySmtpSender {}
+
+impl SmtpSender for DummySmtpSender {
+    fn send(&self, _: &Message) -> Result<String, String> {
+        Ok("Dummy sent response".to_string())
+    }
+}
+
+fn smtp_server_impl(properties: Properties) -> SmtpTransport {
     let username = properties.get("SMTP_USERNAME");
     let password = properties.get("SMTP_PASSWORD");
     let port = properties.get("SMTP_PORT").parse::<u16>().unwrap();

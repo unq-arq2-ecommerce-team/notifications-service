@@ -1,6 +1,7 @@
 use std::fmt;
+use utoipa::ToSchema;
 
-#[derive(Debug)]
+#[derive(Debug, ToSchema)]
 pub struct Error {
     kind: ErrorKind,
     message: String,
@@ -12,7 +13,7 @@ impl fmt::Display for Error {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, ToSchema)]
 pub enum ErrorKind {
     BadInput,
     Other,

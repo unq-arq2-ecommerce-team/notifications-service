@@ -5,7 +5,7 @@ use std::{
 };
 
 use serde::Serializer;
-
+use utoipa::ToSchema;
 use rocket::{
     http,
     request::Request,
@@ -23,7 +23,7 @@ use serde::Serialize;
 use crate::model;
 
 /** The main application error. */
-#[derive(Error, Debug)]
+#[derive(Error, Debug, ToSchema)]
 pub enum ApiError {
     #[error("the user input was invalid")]
     BadRequest(#[source] Box<dyn error::Error + Send + Sync>),

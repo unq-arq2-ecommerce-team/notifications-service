@@ -1,8 +1,9 @@
 use std::fmt;
 use serde::Deserialize;
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 pub struct NotificationRequest {
     pub event: Event,
     pub channel: Channel,
@@ -19,34 +20,34 @@ impl NotificationRequest {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 pub struct Recipient {
     #[serde(rename = "type")]
     pub recipient_type: RecipientType,
     pub id: i32,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 pub struct Event {
     pub name: EventName,
     pub detail: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RecipientType {
     Seller,
     Customer,
 }
 
-#[derive(Deserialize, Serialize, Eq, Hash, PartialEq, Debug)]
+#[derive(Deserialize, Serialize, Eq, Hash, PartialEq, Debug, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Channel {
     Email,
     Whatsapp,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EventName {
     PurchaseSuccessful,

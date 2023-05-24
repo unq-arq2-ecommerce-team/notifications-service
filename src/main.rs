@@ -1,4 +1,9 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
+
+use rocket::{Build, Rocket};
+use utoipa::{OpenApi};
+use utoipa_swagger_ui::*;
 
 use crate::model::email::smtp::SmtpClient;
 use crate::ports::smtp::outlook_client::OutlookClient;
@@ -10,14 +15,41 @@ mod ports;
 mod config;
 
 #[launch]
-fn rocket() -> _ {
+fn rocket() -> Rocket<Build> {
     rocket::build()
         .mount("/", routes![routes::ping])
         .mount("/", routes![api::notification_api::notification])
+
+        .mount(
+            "/",
+            SwaggerUi::new("/docs/<_..>").url("/api-docs/openapi.json", ApiDoc::openapi()),
+        )
         .register("/", catchers![api::error::not_found, api::error::internal_error, api::error::unprocessable_entity])
 }
 
-
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        api::notification_api::notification
+    ),
+    components(
+        schemas(
+            api::notification_request::NotificationRequest,
+            api::notification_request::Channel,
+            api::notification_request::Recipient,
+            api::notification_request::RecipientType,
+            api::notification_request::Event,
+            api::notification_request::EventName,
+            model::notification::NotificationStatus,
+            api::error::ApiError,
+            model::error::ErrorKind
+            )
+    ),
+    tags(
+        (name = "todo", description = "Todo management endpoints.")
+    )
+)]
+struct ApiDoc;
 
 #[cfg(test)]
 mod tests {
@@ -33,7 +65,6 @@ mod tests {
 
     #[test]
     fn send_notification_ok() {
-
         let rt = Runtime::new().unwrap();
         rt.block_on(mock_server());
 
@@ -49,7 +80,6 @@ mod tests {
 
     #[test]
     fn send_notification_fail_user_not_found() {
-
         let rt = Runtime::new().unwrap();
         rt.block_on(mock_server());
 

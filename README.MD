@@ -12,7 +12,10 @@
 
 ## Swagger
 
-WIP
+Implementado con el crate `utoipa` [docs.rs](https://docs.rs/utoipa/latest/utoipa/)
+
+Una vez levantado el servicio, ir al endpoint: http://localhost:8000/docs/
+
 
 ## Ejecución del proyecto (sin docker)
 

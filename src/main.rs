@@ -4,6 +4,7 @@ extern crate rocket;
 use rocket::{Build, Rocket};
 use utoipa::{OpenApi};
 use utoipa_swagger_ui::*;
+use crate::docs::ApiDoc;
 
 use crate::model::email::smtp::SmtpClient;
 use crate::ports::smtp::outlook_client::OutlookClient;
@@ -13,6 +14,7 @@ mod routes;
 mod model;
 mod ports;
 mod config;
+mod docs;
 
 #[launch]
 fn rocket() -> Rocket<Build> {
@@ -27,29 +29,7 @@ fn rocket() -> Rocket<Build> {
         .register("/", catchers![api::error::not_found, api::error::internal_error, api::error::unprocessable_entity])
 }
 
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        api::notification_api::notification
-    ),
-    components(
-        schemas(
-            api::notification_request::NotificationRequest,
-            api::notification_request::Channel,
-            api::notification_request::Recipient,
-            api::notification_request::RecipientType,
-            api::notification_request::Event,
-            api::notification_request::EventName,
-            model::notification::NotificationStatus,
-            api::error::ApiError,
-            model::error::ErrorKind
-            )
-    ),
-    tags(
-        (name = "todo", description = "Todo management endpoints.")
-    )
-)]
-struct ApiDoc;
+
 
 #[cfg(test)]
 mod tests {
